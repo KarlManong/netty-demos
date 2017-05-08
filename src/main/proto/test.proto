@@ -1,0 +1,20 @@
+package netty;
+java_package com.ly.dc.netty.protobuf;
+
+message FirstRequest {
+    required string username;
+    required string password;
+}
+
+message FirstResponse {
+    required string uuid;
+}
+
+message SecondRequest {
+    required string uuid;
+    required string message;
+}
+
+message SecondResponse {
+    required string message;
+}
