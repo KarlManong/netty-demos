@@ -46,11 +46,17 @@ public class MainTest {
         Thread clientThread = new Thread(testClient);
         clientThread.setDaemon(true);
         clientThread.start();
-        Thread.sleep(500); // wait startup
+        Thread.sleep(1000); // wait startup
     }
 
     @Test
     public void test() throws InterruptedException {
         assertTrue(testServer.isRunning());
+    }
+
+    @Test
+    public void testLogin() throws InterruptedException {
+        testClient.login("test", "test");
+        Thread.sleep(3000);
     }
 }

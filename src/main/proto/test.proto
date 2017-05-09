@@ -1,20 +1,26 @@
 package netty;
-java_package com.ly.dc.netty.protobuf;
+option java_package = "com.ly.dc.netty.protobuf";
+option java_outer_classname = "ProtobufClass";
 
-message FirstRequest {
-    required string username;
-    required string password;
-}
+message Messages {
+    message FirstRequest {
+        required string username = 1;
+        required string password = 2;
+    }
+    optional FirstRequest request1 = 1;
+    message SecondRequest {
+        required string uuid = 1;
+        required string message = 2;
+    }
+    optional SecondRequest request2 = 2;
 
-message FirstResponse {
-    required string uuid;
-}
+    message FirstResponse {
+        required string uuid = 1;
+    }
 
-message SecondRequest {
-    required string uuid;
-    required string message;
-}
-
-message SecondResponse {
-    required string message;
+    optional FirstResponse response1 = 3;
+    message SecondResponse {
+        required string message = 1;
+    }
+    optional SecondResponse response2 = 4;
 }

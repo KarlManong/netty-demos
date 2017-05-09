@@ -2,19 +2,21 @@ package com.ly.dc.netty.servers;
 
 import com.ly.dc.netty.CloseableEventLoopGroup;
 import com.ly.dc.netty.EventLoopGroupAdapter;
-import com.ly.dc.netty.handlers.TestHandler;
+import com.ly.dc.netty.protobuf.ProtobufClass;
+import com.ly.dc.netty.servers.handlers.MessageHandler;
 import com.ly.dc.netty.utils.DynamicPortFinder;
+
 import io.netty.bootstrap.ServerBootstrap;
 import io.netty.channel.ChannelFuture;
 import io.netty.channel.ChannelInitializer;
 import io.netty.channel.socket.SocketChannel;
 import io.netty.channel.socket.nio.NioServerSocketChannel;
+import io.netty.handler.codec.protobuf.ProtobufDecoder;
 import io.netty.handler.codec.protobuf.ProtobufEncoder;
 import io.netty.handler.codec.protobuf.ProtobufVarint32FrameDecoder;
 import io.netty.handler.codec.protobuf.ProtobufVarint32LengthFieldPrepender;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
 
 /*
                    _ooOoo_
@@ -39,10 +41,8 @@ import org.slf4j.LoggerFactory;
          佛祖保佑       永无BUG
 */
 public class TestServer implements Runnable {
-    private Logger logger = LoggerFactory.getLogger(TestServer.class);
-
     private final int port;
-
+    private Logger logger = LoggerFactory.getLogger(TestServer.class);
     private boolean running = false;
 
     public TestServer(int port) {
@@ -57,23 +57,23 @@ public class TestServer implements Runnable {
     @Override
     public void run() {
         try (CloseableEventLoopGroup bossGroup = new EventLoopGroupAdapter(2);
-             CloseableEventLoopGroup workerGroup = new EventLoopGroupAdapter()) {
+            CloseableEventLoopGroup workerGroup = new EventLoopGroupAdapter()) {
             logger.info("Server is going to start up at port {}", port);
 
             ServerBootstrap serverBootstrap = new ServerBootstrap();
 
             serverBootstrap.group(bossGroup, workerGroup)
-                    .channel(NioServerSocketChannel.class)
-                    .childHandler(new ChannelInitializer<SocketChannel>() {
-                        @Override
-                        protected void initChannel(SocketChannel ch) throws Exception {
-                            ch.pipeline().addLast(new ProtobufVarint32FrameDecoder())
-                                    // todo .addLast(decoder())
-                                    .addLast(new ProtobufVarint32LengthFieldPrepender())
-                                    .addLast(new ProtobufEncoder())
-                                    .addLast(new TestHandler());
-                        }
-                    });
+                .channel(NioServerSocketChannel.class)
+                .childHandler(new ChannelInitializer<SocketChannel>() {
+                    @Override
+                    protected void initChannel(SocketChannel ch) throws Exception {
+                        ch.pipeline().addLast(new ProtobufVarint32FrameDecoder())
+                            .addLast(new ProtobufDecoder(ProtobufClass.Messages.getDefaultInstance()))
+                            .addLast(new ProtobufVarint32LengthFieldPrepender())
+                            .addLast(new ProtobufEncoder())
+                            .addLast(new MessageHandler());
+                    }
+                });
 
             ChannelFuture f = serverBootstrap.bind(port).sync();
             logger.info("Server starts up");
